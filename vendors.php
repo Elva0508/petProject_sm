@@ -68,7 +68,6 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
                   <span>顯示</span>
                   <select class="selectInfo form-select text-center border border-secondary rounded mx-2" aria-label="Default select example">
                     <option selected value="5">5</option>
-                    <option value="10">10</option>
                     <option value="20">20</option>
                     <option value="50">50</option>
                   </select>
@@ -83,12 +82,12 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
                 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                   // 從表單 POST 提交的資料中擷取數據
                   $search = $_POST['search'];
-              
+
                   // 執行相應的操作，例如將資料存入資料庫或進行驗證
-              
+
                   // 輸出擷取到的資廖
                   echo "search關鍵字: " . $search . "<br>";
-              }
+                }
                 ?>
               </div>
               <div class="list-wrapper">
@@ -148,11 +147,6 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
                       </li>
                     <?php
                     } ?>
-                    <!-- for($i = 1; $i <= $pages; $i++){
-                   
-                    
-                  } -->
-
 
                     <li class="page-item">
                       <a class="page-link" href="javascript:void(0)" onclick="loadPage(<?php echo $page + 1; ?>)">
@@ -187,7 +181,7 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4 && xhr.status === 200) {
             var response = xhr.responseText;
-            var paginationContainer = document.querySelector('.list-wrapper');
+            var paginationContainer = document.querySelector('.table-responsive');
             paginationContainer.innerHTML = response;
           }
         };
@@ -198,18 +192,18 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
       // console.log(selectList[2].value)
 
       selectInfo.addEventListener("change", function(e) {
-        if (this.value == 10) {
-          var xhr = new XMLHttpRequest();
-          xhr.open("GET", "changeTen.php", true);
-          xhr.onreadystatechange = function() {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-              var response = xhr.responseText;
-              var paginationContainer = document.querySelector('.list-wrapper');
-              paginationContainer.innerHTML = response;
-            }
-          };
-          xhr.send();
+        var xhr = new XMLHttpRequest();
+        if (this.value == 20) {
+          xhr.open("GET", "changeTwenty.php", true);
         }
+        xhr.onreadystatechange = function() {
+          if (xhr.readyState === 4 && xhr.status === 200) {
+            var response = xhr.responseText;
+            var paginationContainer = document.querySelector('.table-responsive');
+            paginationContainer.innerHTML = response;
+          }
+        };
+        xhr.send();
       })
     </script>
 
