@@ -1,25 +1,12 @@
-<?php
-// 連線到資料庫
-require_once('connect.php');
-if ($conn->connect_error) {
-  die("連線失敗: " . $conn->connect_error);
+<?php include("do_mainVendor.php");
+if (isset($_GET['search'])) {
+  $searchKeyword = $_GET['search'];
+  header("Location: searchPage.php?search=" . urlencode($searchKeyword));
 }
-$sql = "SELECT * FROM vendor";
-$result = $conn->query($sql);
-
-
-$data_num = $result->num_rows; //統計總比數
-$per = 5; //每頁顯示項目數量
-$pages = ceil($data_num / $per); //取得不小於值的下一個整數，代表總共幾個分頁
-if (!isset($_GET["page"])) { //假如$_GET["page"]未設置
-  $page = 1; //則在此設定起始頁數
-} else {
-  $page = intval($_GET["page"]); //確認頁數只能夠是數值資料
-}
-$start = ($page - 1) * $per; //每一頁開始的資料序號
-$result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
+// var_dump($searchKeyword);
+// 
+// exit();
 ?>
-
 <!doctype html>
 <html lang="en">
 
@@ -41,7 +28,7 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
 
   <!-- Custom styles for this page -->
   <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
-
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 </head>
 
 <body>
@@ -73,22 +60,15 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
                   </select>
                   <span>筆資料</span>
                 </div>
+                <button type="button" class="btn btn-primary sortBtn" value="1" onclick="updateSql()">ID<i class="fa-solid fa-arrow-up-wide-short"></i></button>
+                <button type="button" class="btn btn-primary sortBtn" value="2">ID<i class="fa-solid fa-arrow-down-wide-short"></i></button>
 
-                <form class="form-inline offset-7" method="post">
+
+                <form class="form-inline offset-6" method="GET">
                   <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="search">
                   <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
-                <?php
-                if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-                  // 從表單 POST 提交的資料中擷取數據
-                  $search = $_POST['search'];
 
-                  // 執行相應的操作，例如將資料存入資料庫或進行驗證
-
-                  // 輸出擷取到的資廖
-                  echo "search關鍵字: " . $search . "<br>";
-                }
-                ?>
               </div>
               <div class="list-wrapper">
                 <table class="table table-bordered" width="100%" cellspacing="0">
@@ -115,7 +95,29 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
                     </tr>
                   </tfoot>
                   <tbody>
-                    <?php while ($row = $result->fetch_assoc()) { ?>
+
+                    <!-- // 從表單 POST 提交的資料中擷取數據
+                    $search = isset($GET['search']) ? $GET['search'] : '';
+                    // 執行相應的操作，例如將資料存入資料庫或進行驗證
+                    if (!empty($search)) {
+                      $sql = "SELECT * FROM vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%'";
+                      $result2 = $conn->query($sql);
+                      $data_num = $result2->num_rows;
+                      if (!isset($_GET["page"])) { //假如$_GET["page"]未設置
+                        $page = 1; //則在此設定起始頁數
+                      } else {
+                        $page = intval($_GET["page"]); //確認頁數只能夠是數值資料
+                      }
+                      $pages = ceil($data_num / $per);
+                      $start = ($page - 1) * $per; //每一頁開始的資料序號
+                      $result2 = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
+                      while ($row = $result2->fetch_assoc()) {
+                    ?> -->
+
+
+                    <?php
+                    while ($row = $result->fetch_assoc()) {
+                    ?>
                       <tr>
                         <td><?php echo $row["vendor_id"]; ?></td>
                         <td><img src="./vendorLogo/<?php echo $row["logo_image"]; ?>.png" alt="logo"></td>
@@ -125,7 +127,11 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
                         <td><?php echo $row["created_at"]; ?></td>
                         <td><?php echo $row["updated_at"]; ?></td>
                       </tr>
-                    <?php } ?>
+                    <?php
+                    }
+
+                    ?>
+
                   </tbody>
                 </table>
                 <nav aria-label="Page navigation example" class="d-flex justify-content-end">
@@ -169,45 +175,47 @@ $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
 
         </div>
 
+        <script>
+          function loadPage(page) {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "vendorList.php?page=" + page, true);
+            xhr.onreadystatechange = function() {
+              if (xhr.readyState === 4 && xhr.status === 200) {
+                var response = xhr.responseText;
+                var paginationContainer = document.body;
+                paginationContainer.innerHTML = response;
+              }
+            };
+            xhr.send();
+          }
 
+          const sortBtn = document.querySelectorAll(".sortBtn");
+          sortBtn.forEach((element) => {
+            element.addEventListener("click", async function(e) {
+              try {
+                if (this.value == 1) {
+                  const response = await fetch("mainVendors.php");
+                  const content = await response.text();
+                  const targetElement = document.body;
+                  targetElement.innerHTML = content;
+                  console.log("test")
+                } else if (this.value == 2) {
+                  const response = await fetch("sortId_desc.php"); // 替換為您的 PHP 檔案路徑
+                  const content = await response.text();
+                  // 更新指定的 HTML 元素內容
+                  const targetElement = document.getElementById("content"); // 替換為您要更新內容的元素 ID
+                  targetElement.innerHTML = content;
+                }
+
+              } catch (error) {
+                console.error(error);
+              }
+            });
+          });
+        </script>
       </div>
       <!-- /.container-fluid -->
     </div>
-
-    <script>
-      function loadPage(page) {
-        var xhr = new XMLHttpRequest();
-        xhr.open("GET", "vendorList.php?page=" + page, true);
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            var response = xhr.responseText;
-            var paginationContainer = document.querySelector('.table-responsive');
-            paginationContainer.innerHTML = response;
-          }
-        };
-        xhr.send();
-      }
-      const selectInfo = document.querySelector(".selectInfo")
-      const selectList = selectInfo.querySelectorAll("option")
-      // console.log(selectList[2].value)
-
-      selectInfo.addEventListener("change", function(e) {
-        var xhr = new XMLHttpRequest();
-        if (this.value == 20) {
-          xhr.open("GET", "changeTwenty.php", true);
-        }
-        xhr.onreadystatechange = function() {
-          if (xhr.readyState === 4 && xhr.status === 200) {
-            var response = xhr.responseText;
-            var paginationContainer = document.querySelector('.table-responsive');
-            paginationContainer.innerHTML = response;
-          }
-        };
-        xhr.send();
-      })
-    </script>
-
-
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
     <script src="vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
