@@ -1,11 +1,24 @@
 <?php include("do_mainVendor.php");
 if (isset($_GET['search'])) {
-  $searchKeyword = $_GET['search'];
-  header("Location: searchPage.php?search=" . urlencode($searchKeyword));
+  $search = $_GET['search'];
+  $sql = "SELECT * FROM vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%'";
+  $result = $conn->query($sql);
+  $data_num = $result->num_rows; //統計總比數
+  $per = 5; //每頁顯示項目數量
+  $pages = ceil($data_num / $per); //取得不小於值的下一個整數，代表總共幾個分頁
+  if (!isset($_GET["page"])) { //假如$_GET["page"]未設置
+    $page = 1; //則在此設定起始頁數
+  } else {
+    $page = intval($_GET["page"]); //確認頁數只能夠是數值資料
+  }
+  $start = ($page - 1) * $per; //每一頁開始的資料序號
+  $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
 }
-// var_dump($searchKeyword);
-// 
-// exit();
+
+// 获取 JavaScript 传递的值
+$sortNum = $_GET['sortNum'];
+var_dump($sortNum)
+
 ?>
 <!doctype html>
 <html lang="en">
@@ -29,6 +42,9 @@ if (isset($_GET['search'])) {
   <!-- Custom styles for this page -->
   <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <style>
+
+  </style>
 </head>
 
 <body>
@@ -60,14 +76,17 @@ if (isset($_GET['search'])) {
                   </select>
                   <span>筆資料</span>
                 </div>
-                <button type="button" class="btn btn-primary sortBtn" value="1" onclick="updateSql()">ID<i class="fa-solid fa-arrow-up-wide-short"></i></button>
+                <button type="button" class="btn btn-primary sortBtn" value="1">ID<i class="fa-solid fa-arrow-up-wide-short"></i></button>
                 <button type="button" class="btn btn-primary sortBtn" value="2">ID<i class="fa-solid fa-arrow-down-wide-short"></i></button>
 
 
-                <form class="form-inline offset-6" method="GET">
-                  <input class="form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="search">
-                  <button class="btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
+                <form class="searchForm form-inline offset-6" method="GET">
+                  <input class=" form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="search">
+                  <button class="searchBtn btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
+                <button type="button" class="resetBtn btn btn-primary d-none" style="--bs-btn-padding-y: .25rem; --bs-btn-padding-x: .5rem; --bs-btn-font-size: .75rem;">
+                  重置
+                </button>
 
               </div>
               <div class="list-wrapper">
@@ -136,15 +155,21 @@ if (isset($_GET['search'])) {
                 </table>
                 <nav aria-label="Page navigation example" class="d-flex justify-content-end">
                   <ul class="pagination">
+
                     <li class="page-item">
-                      <a aria-label="Previous" class="page-link" href="javascript:void(0)">
+                      <a aria-label="Previous" class="page-link" href="javascript:void(0)" onclick="loadPage(
+                   <?php if ($page == 1) { ?> 
+                     <?php echo 1 ?>
+                   <?php } else { ?>
+                   <?php echo $page - 1; ?>
+                 <?php } ?>)">
                         <span aria-hidden="true">&laquo;</span>
                         <span class="sr-only">Previous</span>
                       </a>
                     </li>
+
                     <?php $start = max(1, $page - 2) ?>
                     <?php $end = min($start + 4, $pages) ?>
-                    <?php $pageCount = $end - $start + 1 ?>
                     <?php for ($i = $start; $i <= $end; $i++) { ?>
                       <li class="page-item">
                         <a class="page-link" href="javascript:void(0)" onclick="loadPage(<?php echo $i; ?>)">
@@ -155,7 +180,12 @@ if (isset($_GET['search'])) {
                     } ?>
 
                     <li class="page-item">
-                      <a class="page-link" href="javascript:void(0)" onclick="loadPage(<?php echo $page + 1; ?>)">
+                      <a class="page-link" href="javascript:void(0)" onclick="loadPage(
+                      <?php if ($page == $pages) { ?> 
+                     <?php echo $pages ?>
+                   <?php } else { ?>
+                       <?php echo $page + 1; ?>
+                     <?php } ?> )">
                         <span aria-hidden="true">&raquo;</span>
                         <span class="sr-only">Next</span>
                       </a>
@@ -176,14 +206,80 @@ if (isset($_GET['search'])) {
         </div>
 
         <script>
-          function loadPage(page) {
+          const urlParams = new URLSearchParams(window.location.search);
+          let searchValue = urlParams.get('search');
+
+
+          const searchForm = document.querySelector(".searchForm")
+          const searchBtn = document.querySelector(".searchBtn")
+          let searchInput = searchForm.querySelector("input");
+
+          searchForm.addEventListener("submit", (e) => {
+            if (searchInput.value.trim() == '') { //如果表單提交時為空
+              e.preventDefault(); // 阻止表单的默认提交行为
+              alert('請輸入搜尋內容'); // 显示错误提示
+            }
+          })
+
+          let resetBtn = document.querySelector(".resetBtn")
+
+          if (searchValue != null) {
+            resetBtn.classList.remove("d-none")
+            resetBtn.addEventListener("click", (e) => {
+              resetBtn.classList.add("d-none")
+              searchValue = null;
+              resetBtn.classList.add("d-none")
+              var xhr = new XMLHttpRequest();
+              xhr.open("GET", "mainvendors.php", true);
+              xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                  var response = xhr.responseText;
+                  var paginationContainer = document.body;
+                  paginationContainer.innerHTML = response;
+                }
+              };
+              xhr.send();
+            })
+
+          }
+
+          function loadPage(page, search) {
             var xhr = new XMLHttpRequest();
-            xhr.open("GET", "vendorList.php?page=" + page, true);
+            if (searchValue != null) {
+              xhr.open("GET", "mainvendors.php?page=" + page + "&search=" + searchValue, true);
+              // console.log(`mainvendors.php?page=${page}&search=${searchValue}`)
+              // console.log('SearchValue:', searchValue);
+
+            } else {
+              xhr.open("GET", "mainvendors.php?page=" + page, true);
+              // console.log(`mainvendors.php?page=${page}`)
+              // console.log('SearchValue:', searchValue);
+            }
+            //使用 querySelector 方法在每次调用 loadPage 函数时获取 resetBtn 元素，并在需要的时候动态地添加或移除 d-none。
             xhr.onreadystatechange = function() {
               if (xhr.readyState === 4 && xhr.status === 200) {
                 var response = xhr.responseText;
                 var paginationContainer = document.body;
                 paginationContainer.innerHTML = response;
+                resetBtn = document.querySelector(".resetBtn"); // 获取重置按钮元素
+                if (searchValue != null) {
+                  resetBtn.classList.remove("d-none"); // 移除 d-none 类
+                  resetBtn.addEventListener("click", (e) => {
+                    resetBtn.classList.add("d-none")
+                    searchValue = null;
+                    resetBtn.classList.add("d-none")
+                    var xhr = new XMLHttpRequest();
+                    xhr.open("GET", "mainvendors.php", true);
+                    xhr.onreadystatechange = function() {
+                      if (xhr.readyState === 4 && xhr.status === 200) {
+                        var response = xhr.responseText;
+                        var paginationContainer = document.body;
+                        paginationContainer.innerHTML = response;
+                      }
+                    };
+                    xhr.send();
+                  })
+                }
               }
             };
             xhr.send();
@@ -191,27 +287,32 @@ if (isset($_GET['search'])) {
 
           const sortBtn = document.querySelectorAll(".sortBtn");
           sortBtn.forEach((element) => {
-            element.addEventListener("click", async function(e) {
-              try {
-                if (this.value == 1) {
-                  const response = await fetch("mainVendors.php");
-                  const content = await response.text();
-                  const targetElement = document.body;
-                  targetElement.innerHTML = content;
-                  console.log("test")
-                } else if (this.value == 2) {
-                  const response = await fetch("sortId_desc.php"); // 替換為您的 PHP 檔案路徑
-                  const content = await response.text();
-                  // 更新指定的 HTML 元素內容
-                  const targetElement = document.getElementById("content"); // 替換為您要更新內容的元素 ID
-                  targetElement.innerHTML = content;
-                }
+            element.addEventListener("click", function(e) {
+              sortNum = this.value
+              // 发送 GET 请求并将按钮的值作为查询参数传递给 PHP
+              var xhr = new XMLHttpRequest();
 
-              } catch (error) {
-                console.error(error);
-              }
+              // 设置请求方法和 URL
+              xhr.open("GET", "mainVendors.php", true);
+
+              // 设置请求头（如果需要）
+              xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+
+              // 监听请求状态变化
+              xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                  // 请求成功，进行相应的操作
+                  var response = xhr.responseText;
+                  console.log("Response:", response);
+                }
+              };
+              // 准备要发送的数据
+              var data = "sortNum=value1"; // 根据您的需求设置数据格式
+
+              // 发送请求
+              xhr.send(data);
             });
-          });
+          })
         </script>
       </div>
       <!-- /.container-fluid -->

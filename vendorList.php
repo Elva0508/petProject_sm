@@ -161,9 +161,10 @@
     </div>
 
     <script>
-      function loadPage(page) {
+      function loadPage(page, search) {
         var xhr = new XMLHttpRequest();
-        xhr.open("GET", "vendorList.php?page=" + page, true);
+        xhr.open("GET", "searchPage.php?page=" + page + "&search=" + search, true);
+        console.log(`searchPage.php?page=${page}&search=${search}`)
         xhr.onreadystatechange = function() {
           if (xhr.readyState === 4 && xhr.status === 200) {
             var response = xhr.responseText;
