@@ -1,7 +1,20 @@
-<?php include("do_mainVendor.php");
+<?php
+include("do_mainVendor.php");
 if (isset($_GET['search'])) {
   $search = $_GET['search'];
-  $sql = "SELECT * FROM vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%'";
+  if (isset($_GET['sortBtn'])) {
+    if ($_GET['sortBtn'] == 1) {
+      $sql = "SELECT * FROM pet.vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%' ORDER BY vendor_id";
+    } else if ($_GET['sortBtn'] == 2) {
+      $sql = "SELECT * FROM pet.vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%' ORDER BY vendor_id DESC";
+    } else if ($_GET['sortBtn'] == 3) {
+      $sql = "SELECT * FROM pet.vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%' ORDER BY account ";
+    } else if ($_GET['sortBtn'] == 4) {
+      $sql = "SELECT * FROM pet.vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%' ORDER BY account DESC";
+    }
+  } else {
+    $sql = "SELECT * FROM vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%'";
+  }
   $result = $conn->query($sql);
   $data_num = $result->num_rows; //統計總比數
   $per = 5; //每頁顯示項目數量
@@ -16,8 +29,46 @@ if (isset($_GET['search'])) {
 }
 
 // 获取 JavaScript 传递的值
-$sortNum = $_GET['sortNum'];
-var_dump($sortNum)
+if (isset($_GET['sortNum'])) {
+  $sortNum = $_GET['sortNum'];
+  if ($sortNum == 1) {
+    if (isset($_GET['search'])) {
+      $search = $_GET['search'];
+      $sql = "SELECT * FROM pet.vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%' ORDER BY vendor_id";
+    } else {
+      $sql = "SELECT * FROM pet.vendor ORDER BY vendor_id";
+    }
+  } else if ($sortNum == 2) {
+    if (isset($_GET['search'])) {
+      $sql = "SELECT * FROM pet.vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%' ORDER BY vendor_id DESC";
+    } else {
+      $sql = "SELECT * FROM pet.vendor ORDER BY vendor_id DESC";
+    }
+  } else if ($sortNum == 3) {
+    if (isset($_GET['search'])) {
+      $sql = "SELECT * FROM pet.vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%' ORDER BY account";
+    } else {
+      $sql = "SELECT * FROM pet.vendor ORDER BY account";
+    }
+  } else if ($sortNum == 4) {
+    if (isset($_GET['search'])) {
+      $sql = "SELECT * FROM pet.vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%' ORDER BY account DESC";
+    } else {
+      $sql = "SELECT * FROM pet.vendor ORDER BY account DESC";
+    }
+  }
+  $result = $conn->query($sql);
+  $data_num = $result->num_rows; //統計總比數
+  $per = 5; //每頁顯示項目數量
+  $pages = ceil($data_num / $per); //取得不小於值的下一個整數，代表總共幾個分頁
+  if (!isset($_GET["page"])) { //假如$_GET["page"]未設置
+    $page = 1; //則在此設定起始頁數
+  } else {
+    $page = intval($_GET["page"]); //確認頁數只能夠是數值資料
+  }
+  $start = ($page - 1) * $per; //每一頁開始的資料序號
+  $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
+}
 
 ?>
 <!doctype html>
@@ -43,7 +94,7 @@ var_dump($sortNum)
   <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-
+   w */
   </style>
 </head>
 
@@ -76,11 +127,53 @@ var_dump($sortNum)
                   </select>
                   <span>筆資料</span>
                 </div>
-                <button type="button" class="btn btn-primary sortBtn" value="1">ID<i class="fa-solid fa-arrow-up-wide-short"></i></button>
-                <button type="button" class="btn btn-primary sortBtn" value="2">ID<i class="fa-solid fa-arrow-down-wide-short"></i></button>
+                <form id="sortForm" action="mainVendors.php" method="GET">
+                  <?php if (isset($search)) { ?>
+                    <input type="hidden" name="search" value="<?php echo $search; ?>">
+                  <?php } ?>
+                  <?php if (isset($sortNum)) { ?>
+                    <?php if ($sortNum == '1') { ?>
+                      <button disabled type="submit" class="btn btn-primary sortBtn" name="sortNum" value="1">ID<i class="fa-solid fa-arrow-up-wide-short"></i></button>
+                    <?php } else { ?>
+                      <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="1">ID<i class="fa-solid fa-arrow-up-wide-short"></i></button>
+                    <?php } ?>
+
+                    <?php if ($sortNum == '2') { ?>
+                      <button disabled type="submit" class="btn btn-primary sortBtn" name="sortNum" value="2">ID<i class="fa-solid fa-arrow-down-wide-short"></i></button>
+                    <?php } else { ?>
+                      <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="2">ID<i class="fa-solid fa-arrow-down-wide-short"></i></button>
+                    <?php } ?>
+
+                    <?php if ($sortNum == '3') { ?>
+                      <button disabled type="submit" class="btn btn-primary sortBtn" name="sortNum" value="3">帳號<i class="fa-solid fa-arrow-up-wide-short"></i></button>
+                    <?php } else { ?>
+                      <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="3">帳號<i class="fa-solid fa-arrow-up-wide-short"></i></button>
+                    <?php } ?>
+
+                    <?php if ($sortNum == '4') { ?>
+                      <button disabled type="submit" class="btn btn-primary sortBtn" name="sortNum" value="4">帳號<i class="fa-solid fa-arrow-down-wide-short"></i></button>
+                    <?php } else { ?>
+                      <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="4">帳號<i class="fa-solid fa-arrow-down-wide-short"></i></button>
+                    <?php } ?>
+                  <?php } else { ?>
+                    <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="1">ID<i class="fa-solid fa-arrow-up-wide-short"></i></button>
+                    <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="2">ID<i class="fa-solid fa-arrow-down-wide-short"></i></button>
+                    <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="3">帳號<i class="fa-solid fa-arrow-up-wide-short"></i></button>
+                    <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="4">帳號<i class="fa-solid fa-arrow-down-wide-short"></i></button>
+                  <?php } ?>
+                </form>
 
 
-                <form class="searchForm form-inline offset-6" method="GET">
+
+
+
+
+
+
+
+
+                <form action="mainVendors.php" class="searchForm form-inline offset-6" method="GET">
+                  <?php if (isset($sortNum)) { ?><input type="hidden" name="sortNum" value="<?php echo $sortNum; ?>"><?php } ?>
                   <input class=" form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="search">
                   <button class="searchBtn btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
@@ -208,6 +301,7 @@ var_dump($sortNum)
         <script>
           const urlParams = new URLSearchParams(window.location.search);
           let searchValue = urlParams.get('search');
+          let sortNum = urlParams.get('sortNum');
 
 
           const searchForm = document.querySelector(".searchForm")
@@ -243,15 +337,15 @@ var_dump($sortNum)
 
           }
 
-          function loadPage(page, search) {
+          function loadPage(page) {
             var xhr = new XMLHttpRequest();
             if (searchValue != null) {
-              xhr.open("GET", "mainvendors.php?page=" + page + "&search=" + searchValue, true);
+              xhr.open("GET", "mainvendors.php?page=" + page + "&search=" + searchValue + "&sortNum=" + sortNum, true);
               // console.log(`mainvendors.php?page=${page}&search=${searchValue}`)
               // console.log('SearchValue:', searchValue);
 
             } else {
-              xhr.open("GET", "mainvendors.php?page=" + page, true);
+              xhr.open("GET", "mainvendors.php?page=" + page + "&sortNum=" + sortNum, true);
               // console.log(`mainvendors.php?page=${page}`)
               // console.log('SearchValue:', searchValue);
             }
@@ -284,35 +378,6 @@ var_dump($sortNum)
             };
             xhr.send();
           }
-
-          const sortBtn = document.querySelectorAll(".sortBtn");
-          sortBtn.forEach((element) => {
-            element.addEventListener("click", function(e) {
-              sortNum = this.value
-              // 发送 GET 请求并将按钮的值作为查询参数传递给 PHP
-              var xhr = new XMLHttpRequest();
-
-              // 设置请求方法和 URL
-              xhr.open("GET", "mainVendors.php", true);
-
-              // 设置请求头（如果需要）
-              xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
-
-              // 监听请求状态变化
-              xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                  // 请求成功，进行相应的操作
-                  var response = xhr.responseText;
-                  console.log("Response:", response);
-                }
-              };
-              // 准备要发送的数据
-              var data = "sortNum=value1"; // 根据您的需求设置数据格式
-
-              // 发送请求
-              xhr.send(data);
-            });
-          })
         </script>
       </div>
       <!-- /.container-fluid -->
