@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- 主機： 127.0.0.1
--- 產生時間： 2023-07-09 17:44:25
+-- 產生時間： 2023-07-11 16:43:29
 -- 伺服器版本： 10.4.28-MariaDB
 -- PHP 版本： 8.0.28
 
@@ -121,7 +121,14 @@ INSERT INTO `vendor` (`vendor_id`, `account`, `password`, `name`, `company_locat
 (76, 'WanderlustDreamer23', 'WanderlustDreamer23', '悠閒貓食罐頭食品有限公司', '新竹市', 'vendorIcon2', '2023-01-15 11:49:00', '2023-01-15 11:49:00'),
 (77, 'WanderlustDreamer24', 'WanderlustDreamer24', '貓食佳餚寵物生活用品有限公司', '高雄市', 'vendorIcon5', '2023-05-24 19:28:00', '2023-05-24 19:28:00'),
 (78, 'SunshineSmiles125', 'SunshineSmiles125', '貓咪專業生活用品有限公司', '高雄市', 'vendorIcon2', '2023-04-28 02:06:00', '2023-04-28 02:06:00'),
-(79, 'SunshineSmiles124', 'SunshineSmiles124', '味道貓餐廳管理有限公司', '新竹市', 'vendorIcon5', '2023-03-08 08:44:00', '2023-03-08 08:44:00');
+(79, 'SunshineSmiles124', 'SunshineSmiles124', '味道貓餐廳管理有限公司', '新竹市', 'vendorIcon5', '2023-03-08 08:44:00', '2023-03-08 08:44:00'),
+(80, 'monster123', 'monster123', '怪獸部落', '台北市', 'vendorIcon18', '2023-07-11 11:54:23', '2023-07-11 11:54:23'),
+(81, 'cc123123', '$2y$10$CmQr7KMmW/XbSUu/j7elfub', '測試帳號01', '', '', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(82, 'dd123123', '$2y$10$p/5iL5sAw5rCuFtKtC9Jde2', '測試帳號02', '', '', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(83, 'ee123123', '$2y$10$HMAZTjJXqmbao9niKHPaEe1', '測試帳號03', '', '', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(84, 'ff123123', '$2y$10$.Xau/86Z/NIzLDOug043uOI', '測試帳號04', '', '', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(85, 'gg123123', '$2y$10$NVmrDTiKRBEqpunguW1xyeB', '測試帳號05', '', '', '0000-00-00 00:00:00', '0000-00-00 00:00:00'),
+(86, 'hh123123', '$2y$10$B1KefryzfuS4Ypo7iVgIseH', '測試帳號06', '', '', '0000-00-00 00:00:00', '0000-00-00 00:00:00');
 
 --
 -- 已傾印資料表的索引
@@ -141,7 +148,7 @@ ALTER TABLE `vendor`
 -- 使用資料表自動遞增(AUTO_INCREMENT) `vendor`
 --
 ALTER TABLE `vendor`
-  MODIFY `vendor_id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
+  MODIFY `vendor_id` int(30) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=87;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

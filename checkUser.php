@@ -14,3 +14,5 @@ if (isset($_POST['account'])) {
         echo "使用者帳號可使用";
     }
 }
+
+?>
