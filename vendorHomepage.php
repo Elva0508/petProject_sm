@@ -36,9 +36,11 @@ $vendorInfo = array(
         }
 
         .container-frame {
-            border: 1px solid #ddd;
+            border: 2px solid #ddd;
+            border-radius: 20px;
             padding: 20px;
             margin-top: 30px;
+            width: 70%;
         }
 
         .page-title {
@@ -47,19 +49,20 @@ $vendorInfo = array(
             font-weight: bold;
             margin-bottom: 20px;
         }
-        .name{
-            font-size: 42px;
+
+        .name {
+            font-size: 40px;
         }
     </style>
 </head>
 
 <body>
-    <div class="container">
-        <div class="container-frame">
-            <h2 class="page-title">歡迎廠商 <?php echo"<span class='name'>".$vendorInfo['商家名稱']."</span>" ?>，登入後台管理系統</h2>
-            <img src="./vendorLogo/vendorIcon18.png" alt="vendorImage" class="header-img">
-            <div class="row mt-5">
-                <div class="col-md-6">
+    <div class="container d-flex justify-content-center align-content-center">
+        <div class="container-frame row">
+            <h2 class="page-title col-12">歡迎廠商 <?php echo "<span class='name'>" . $vendorInfo['商家名稱'] . "</span>" ?>，登入後台管理系統</h2>
+            <img src="./vendorLogo/vendorIcon18.png" alt="vendorImage" class="header-img col-6">
+            <div class="row mt-5 col-12 offset-2">
+                <div class="col-8">
                     <table class="table">
                         <tbody>
                             <?php foreach ($vendorInfo as $key => $value) : ?>
@@ -70,8 +73,10 @@ $vendorInfo = array(
                             <?php endforeach; ?>
                         </tbody>
                     </table>
+
                 </div>
             </div>
+            <button class="btn btn-dark editBtn m-auto">編輯</button>
         </div>
     </div>
     <!-- Bootstrap JavaScript Libraries -->
