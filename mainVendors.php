@@ -73,9 +73,14 @@ if (isset($_GET['sortNum'])) {
 
 //顯示每頁筆數
 $infoNum = isset($_GET['infoNum']) ? $_GET['infoNum'] : 5;
-if ($infoNum != 5) {
+if ($infoNum == 20) {
   $per = $infoNum; //每頁顯示項目數量
-  $pages = ceil(intval($data_num) / intval($per)); //取得不小於值的下一個整數，代表總共幾個分頁
+  $pages = ceil($data_num / $per); //取得不小於值的下一個整數，代表總共幾個分頁
+  $start = ($page - 1) * $per; //每一頁開始的資料序號
+  $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
+} else if ($infoNum == 50) {
+  $per = $infoNum; //每頁顯示項目數量
+  $pages = ceil($data_num / $per); //取得不小於值的下一個整數，代表總共幾個分頁
   $start = ($page - 1) * $per; //每一頁開始的資料序號
   $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
 }
@@ -217,16 +222,16 @@ if ($infoNum != 5) {
                       <th>上次更新時間</th>
                     </tr>
                   </tfoot>
-                  <form action="getDlt.php" method="GET">
+                  <form action="vendorDlt.php" method="GET">
                     <button class="dltBtn btn btn-dark">刪除</button>
                     <tbody>
                       <?php
                       while ($row = $result->fetch_assoc()) {
                       ?>
                         <tr>
-                          <td onclick="toggleCheckbox(this)"><input type="checkbox" name="checkbox" value="0" class="checkBox"></td>
+                          <td onclick="toggleCheckbox(this)"><input type="checkbox" name="checkbox[]" value="<?php echo $row["vendor_id"]; ?>" class="checkBox"></td>
                           <td><?php echo $row["vendor_id"]; ?></td>
-                          <td><img src="./vendorLogo/<?php echo $row["logo_image"]; ?>.png" alt="logo"></td>
+                          <td><img src="./vendorLogo/<?php echo $row["logo_image"]; ?>" alt="logo"></td>
                           <td><?php echo $row["name"]; ?></td>
                           <td><?php echo $row["account"]; ?></td>
                           <td><?php echo $row["company_location"]; ?></td>
@@ -376,28 +381,31 @@ if ($infoNum != 5) {
 
             // 切换复选框的选中状态
             checkbox.checked = !checkbox.checked;
-            if (checkbox.checked) {
-              checkbox.value = "1"
-            } else {
-              checkbox.value = "0"
-            }
-            console.log(checkbox)
+
+            // 检查所有复选框的状态
+            let allCheck = document.querySelector(".allCheck");
+            let checkBoxes = document.querySelectorAll('.checkBox');
+            let allChecked = true;
+
+            checkBoxes.forEach(checkbox => {
+              if (!checkbox.checked) {
+                allChecked = false;
+                return;
+              }
+            });
+
+            // 根据所有复选框的状态，更新全选复选框的状态
+            allCheck.checked = allChecked;
+
+            //當單個 checkbox 被點擊時，程式會檢查所有的 checkbox 是否都被選中，並根據結果來更新全選的 checkbox 的狀態。如果所有的 checkbox 都被選中，則全選的 checkbox 會被勾選；否則，全選的 checkbox 不會被勾選。
           }
 
           function toggleAllCheck() {
             let allCheck = document.querySelector(".allCheck");
-
             let checkBoxes = document.querySelectorAll('.checkBox');
             console.log(checkBoxes)
-
             checkBoxes.forEach((checkbox) => {
               checkbox.checked = allCheck.checked;
-              if (checkbox.checked) {
-                checkbox.value = "1"
-              } else {
-                checkbox.value = "0"
-              }
-              console.log(checkbox)
             });
 
           }
