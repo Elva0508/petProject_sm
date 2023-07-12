@@ -1,5 +1,6 @@
 <?php
 include("do_mainVendor.php");
+//搜尋功能
 if (isset($_GET['search'])) {
   $search = $_GET['search'];
   if (isset($_GET['sortBtn'])) {
@@ -17,7 +18,7 @@ if (isset($_GET['search'])) {
   }
   $result = $conn->query($sql);
   $data_num = $result->num_rows; //統計總比數
-  $per = 5; //每頁顯示項目數量
+  $per = isset($per) && $per > 0 ? $per : 5; // Set default value if $per is invalid
   $pages = ceil($data_num / $per); //取得不小於值的下一個整數，代表總共幾個分頁
   if (!isset($_GET["page"])) { //假如$_GET["page"]未設置
     $page = 1; //則在此設定起始頁數
@@ -28,7 +29,7 @@ if (isset($_GET['search'])) {
   $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
 }
 
-// 获取 JavaScript 传递的值
+//排序按鈕篩選資料
 if (isset($_GET['sortNum'])) {
   $sortNum = $_GET['sortNum'];
   if ($sortNum == 1) {
@@ -70,6 +71,14 @@ if (isset($_GET['sortNum'])) {
   $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
 }
 
+//顯示每頁筆數
+$infoNum = isset($_GET['infoNum']) ? $_GET['infoNum'] : 5;
+if ($infoNum != 5) {
+  $per = $infoNum; //每頁顯示項目數量
+  $pages = ceil(intval($data_num) / intval($per)); //取得不小於值的下一個整數，代表總共幾個分頁
+  $start = ($page - 1) * $per; //每一頁開始的資料序號
+  $result = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
+}
 ?>
 <!doctype html>
 <html lang="en">
@@ -94,7 +103,7 @@ if (isset($_GET['sortNum'])) {
   <link href="vendor/datatables/dataTables.bootstrap4.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
-   w */
+    w */
   </style>
 </head>
 
@@ -117,14 +126,21 @@ if (isset($_GET['sortNum'])) {
           <div class="card-body">
             <div class="table-responsive">
               <div class="d-flex justify-content-center mb-3">
-                <!-- Example single danger button -->
                 <div class="d-flex align-items-center justify-content-between">
                   <span>顯示</span>
-                  <select class="selectInfo form-select text-center border border-secondary rounded mx-2" aria-label="Default select example">
-                    <option selected value="5">5</option>
-                    <option value="20">20</option>
-                    <option value="50">50</option>
-                  </select>
+                  <form action="mainVendors.php" method="GET" onchange="submit()">
+                    <select class="selectInfo form-select text-center border border-secondary rounded mx-2" aria-label="Default select example" name="infoNum">
+                      <option <?php if ($infoNum == 5) echo "selected='selected'" ?> value="5">5</option>
+                      <option <?php if ($infoNum == 20) echo "selected='selected'" ?>value="20">20</option>
+                      <option <?php if ($infoNum == 50) echo "selected='selected'" ?> value="50">50</option>
+                    </select>
+                    <?php if (isset($sortNum)) { ?>
+                      <input type="hidden" name="sortNum" value="<?php echo $sortNum; ?>">
+                    <?php } ?>
+                    <?php if (isset($search)) { ?>
+                      <input type="hidden" name="search" value="<?php echo $search; ?>">
+                    <?php } ?>
+                  </form>
                   <span>筆資料</span>
                 </div>
                 <form id="sortForm" action="mainVendors.php" method="GET">
@@ -161,19 +177,12 @@ if (isset($_GET['sortNum'])) {
                     <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="3">帳號<i class="fa-solid fa-arrow-up-wide-short"></i></button>
                     <button type="submit" class="btn btn-primary sortBtn" name="sortNum" value="4">帳號<i class="fa-solid fa-arrow-down-wide-short"></i></button>
                   <?php } ?>
+                  <input type="hidden" name="infoNum" value="<?php echo $infoNum; ?>">
                 </form>
-
-
-
-
-
-
-
-
-
 
                 <form action="mainVendors.php" class="searchForm form-inline offset-6" method="GET">
                   <?php if (isset($sortNum)) { ?><input type="hidden" name="sortNum" value="<?php echo $sortNum; ?>"><?php } ?>
+                  <?php if (isset($infoNum)) { ?><input type="hidden" name="infoNum" value="<?php echo $infoNum; ?>"><?php } ?>
                   <input class=" form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="search">
                   <button class="searchBtn btn btn-outline-success my-2 my-sm-0" type="submit">Search</button>
                 </form>
@@ -186,6 +195,7 @@ if (isset($_GET['sortNum'])) {
                 <table class="table table-bordered" width="100%" cellspacing="0">
                   <thead>
                     <tr>
+                      <th><input type="checkbox" onclick="toggleAllCheck()" style="margin-right: 5px;" id="allCheck" name="allCheck" class="allCheck"><label for="allCheck" class="allCheck" onclick="toggleAllCheck()">全選</label></th>
                       <th>ID</th>
                       <th>企業商標</th>
                       <th>廠商名稱</th>
@@ -197,6 +207,7 @@ if (isset($_GET['sortNum'])) {
                   </thead>
                   <tfoot>
                     <tr>
+                      <th>選取</th>
                       <th>ID</th>
                       <th>企業商標</th>
                       <th>廠商名稱</th>
@@ -206,45 +217,28 @@ if (isset($_GET['sortNum'])) {
                       <th>上次更新時間</th>
                     </tr>
                   </tfoot>
-                  <tbody>
+                  <form action="getDlt.php" method="GET">
+                    <button class="dltBtn btn btn-dark">刪除</button>
+                    <tbody>
+                      <?php
+                      while ($row = $result->fetch_assoc()) {
+                      ?>
+                        <tr>
+                          <td onclick="toggleCheckbox(this)"><input type="checkbox" name="checkbox" value="0" class="checkBox"></td>
+                          <td><?php echo $row["vendor_id"]; ?></td>
+                          <td><img src="./vendorLogo/<?php echo $row["logo_image"]; ?>.png" alt="logo"></td>
+                          <td><?php echo $row["name"]; ?></td>
+                          <td><?php echo $row["account"]; ?></td>
+                          <td><?php echo $row["company_location"]; ?></td>
+                          <td><?php echo $row["created_at"]; ?></td>
+                          <td><?php echo $row["updated_at"]; ?></td>
 
-                    <!-- // 從表單 POST 提交的資料中擷取數據
-                    $search = isset($GET['search']) ? $GET['search'] : '';
-                    // 執行相應的操作，例如將資料存入資料庫或進行驗證
-                    if (!empty($search)) {
-                      $sql = "SELECT * FROM vendor WHERE account LIKE '%$search%' OR name LIKE '%$search%'";
-                      $result2 = $conn->query($sql);
-                      $data_num = $result2->num_rows;
-                      if (!isset($_GET["page"])) { //假如$_GET["page"]未設置
-                        $page = 1; //則在此設定起始頁數
-                      } else {
-                        $page = intval($_GET["page"]); //確認頁數只能夠是數值資料
+                        </tr>
+                      <?php
                       }
-                      $pages = ceil($data_num / $per);
-                      $start = ($page - 1) * $per; //每一頁開始的資料序號
-                      $result2 = $conn->query($sql . ' LIMIT ' . $start . ', ' . $per) or die("Error");
-                      while ($row = $result2->fetch_assoc()) {
-                    ?> -->
-
-
-                    <?php
-                    while ($row = $result->fetch_assoc()) {
-                    ?>
-                      <tr>
-                        <td><?php echo $row["vendor_id"]; ?></td>
-                        <td><img src="./vendorLogo/<?php echo $row["logo_image"]; ?>.png" alt="logo"></td>
-                        <td><?php echo $row["name"]; ?></td>
-                        <td><?php echo $row["account"]; ?></td>
-                        <td><?php echo $row["company_location"]; ?></td>
-                        <td><?php echo $row["created_at"]; ?></td>
-                        <td><?php echo $row["updated_at"]; ?></td>
-                      </tr>
-                    <?php
-                    }
-
-                    ?>
-
-                  </tbody>
+                      ?>
+                    </tbody>
+                  </form>
                 </table>
                 <nav aria-label="Page navigation example" class="d-flex justify-content-end">
                   <ul class="pagination">
@@ -299,15 +293,15 @@ if (isset($_GET['sortNum'])) {
         </div>
 
         <script>
+          //用JS取得URL上的資料
           const urlParams = new URLSearchParams(window.location.search);
           let searchValue = urlParams.get('search');
           let sortNum = urlParams.get('sortNum');
-
+          let infoNum = urlParams.get('infoNum');
 
           const searchForm = document.querySelector(".searchForm")
           const searchBtn = document.querySelector(".searchBtn")
           let searchInput = searchForm.querySelector("input");
-
           searchForm.addEventListener("submit", (e) => {
             if (searchInput.value.trim() == '') { //如果表單提交時為空
               e.preventDefault(); // 阻止表单的默认提交行为
@@ -340,14 +334,11 @@ if (isset($_GET['sortNum'])) {
           function loadPage(page) {
             var xhr = new XMLHttpRequest();
             if (searchValue != null) {
-              xhr.open("GET", "mainvendors.php?page=" + page + "&search=" + searchValue + "&sortNum=" + sortNum, true);
-              // console.log(`mainvendors.php?page=${page}&search=${searchValue}`)
-              // console.log('SearchValue:', searchValue);
+              xhr.open("GET", "mainvendors.php?page=" + page + "&search=" + searchValue + "&sortNum=" + sortNum + "&infoNum=" + infoNum, true);
 
             } else {
-              xhr.open("GET", "mainvendors.php?page=" + page + "&sortNum=" + sortNum, true);
-              // console.log(`mainvendors.php?page=${page}`)
-              // console.log('SearchValue:', searchValue);
+              xhr.open("GET", "mainvendors.php?page=" + page + "&sortNum=" + sortNum + "&infoNum=" + infoNum, true);
+
             }
             //使用 querySelector 方法在每次调用 loadPage 函数时获取 resetBtn 元素，并在需要的时候动态地添加或移除 d-none。
             xhr.onreadystatechange = function() {
@@ -378,9 +369,40 @@ if (isset($_GET['sortNum'])) {
             };
             xhr.send();
           }
+
+          function toggleCheckbox(td) {
+            // 获取关联的复选框
+            let checkbox = td.querySelector('input[type="checkbox"]');
+
+            // 切换复选框的选中状态
+            checkbox.checked = !checkbox.checked;
+            if (checkbox.checked) {
+              checkbox.value = "1"
+            } else {
+              checkbox.value = "0"
+            }
+            console.log(checkbox)
+          }
+
+          function toggleAllCheck() {
+            let allCheck = document.querySelector(".allCheck");
+
+            let checkBoxes = document.querySelectorAll('.checkBox');
+            console.log(checkBoxes)
+
+            checkBoxes.forEach((checkbox) => {
+              checkbox.checked = allCheck.checked;
+              if (checkbox.checked) {
+                checkbox.value = "1"
+              } else {
+                checkbox.value = "0"
+              }
+              console.log(checkbox)
+            });
+
+          }
         </script>
       </div>
-      <!-- /.container-fluid -->
     </div>
     <!-- Bootstrap core JavaScript-->
     <script src="vendor/jquery/jquery.min.js"></script>
