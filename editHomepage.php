@@ -15,12 +15,12 @@ if (!empty($_POST)) {
     $account = $_POST['account'];
     $location = $_POST['location'];
     $vendor_id = $row['vendor_id'];
-    $image = $_FILES['image'];
-    $fileName = $_FILES['image']['name'];
-    $tmp_name = $_FILES['image']['tmp_name'];
-    echo $fileName;
-    // 檢查上傳錯誤
-    if ($_FILES['image']['error'] === 0) {
+    $image = $row['logo_image']; // 默认值为原始的 logo_image
+
+    if (isset($_FILES['image']) && $_FILES['image']['error'] === 0) {
+        // 如果接收到了新的 $_FILES['image']，且上传没有错误
+        $fileName = $_FILES['image']['name'];
+        $tmp_name = $_FILES['image']['tmp_name'];
         $targetDir = "C:/xampp/htdocs/petProject_sm/vendorLogo/";
 
         // 檢查目標資料夾是否存在，若不存在則建立之
@@ -32,13 +32,7 @@ if (!empty($_POST)) {
 
         // 移動檔案到目標資料夾
         if (move_uploaded_file($tmp_name, $targetFile)) {
-            // 更新資料庫
-            $stmt = $conn->prepare("UPDATE pet.vendor SET name = ?, account = ?, company_location = ?, logo_image = ?, updated_at = NOW() WHERE vendor_id = ?");
-            $stmt->bind_param("ssssi", $name, $account, $location, $fileName, $vendor_id);
-            $stmt->execute();
-            $stmt->close();
-            header("location: vendorHomepage.php");
-            exit;
+            $image = $fileName; // 更新 image 值为新上传的文件名
         } else {
             echo "無法移動檔案至目標資料夾。";
         }
@@ -46,11 +40,13 @@ if (!empty($_POST)) {
         echo "檔案上傳錯誤：" . $_FILES['image']['error'];
     }
 
+    // 更新資料庫
     $stmt = $conn->prepare("UPDATE pet.vendor SET name = ?, account = ?, company_location = ?, logo_image = ?, updated_at = NOW() WHERE vendor_id = ?");
-    $stmt->bind_param("ssssi", $name, $account, $location, $fileName, $vendor_id);
+    $stmt->bind_param("ssssi", $name, $account, $location, $image, $vendor_id);
     $stmt->execute();
     $stmt->close();
     header("location: vendorHomepage.php");
+    exit;
 }
 
 $vendorInfo = array(
@@ -83,9 +79,12 @@ $vendorInfo = array(
                 <h2 class="page-title col-12">歡迎廠商 <?php echo "<span class='name'>" . $vendorInfo['商家名稱'] . "</span>" ?>，進入資料修改頁面</h2>
                 <div class="circle">
                     <img src="./vendorLogo/<?php echo  $row['logo_image'] ?>" alt="vendorImage" class="header-img">
-                    <input type="file" name="image">
                 </div>
-                <div class="row mt-5 col-12 offset-2">
+                <div class="fileInput col-12 d-flex justify-content-center">
+                    <input type="file" name="image" class="offset-2 mt-2">
+                </div>
+
+                <div class="row mt-4 col-12 offset-2">
                     <div class="col-8">
                         <table class="table">
                             <tbody>

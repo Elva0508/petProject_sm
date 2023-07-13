@@ -237,7 +237,15 @@ if ($infoNum == 20) {
                           <td><?php echo $row["company_location"]; ?></td>
                           <td><?php echo $row["created_at"]; ?></td>
                           <td><?php echo $row["updated_at"]; ?></td>
-
+                          <?php if (isset($search)) { ?>
+                            <input type="hidden" name="search" value="<?php echo $search; ?>">
+                          <?php } ?>
+                          <?php if (isset($infoNum)) { ?>
+                            <input type="hidden" name="infoNum" value="<?php echo $infoNum; ?>">
+                          <?php } ?>
+                          <?php if (isset($sortNum)) { ?>
+                            <input type="hidden" name="sortNum" value="<?php echo $sortNum; ?>">
+                          <?php } ?>
                         </tr>
                       <?php
                       }

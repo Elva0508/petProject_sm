@@ -1,5 +1,5 @@
 <?php
-
+session_start();
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
   // 處理表單提交的內容
   require_once('connect.php');
@@ -9,15 +9,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
   $currentDateTime = date('Y-m-d H:i:s');
 
-  $sql = "INSERT INTO pet.vendor (account, password, name,created_at,updated_at) VALUES ('$account', '$hashedPassword', '$name','$currentDateTime','$currentDateTime');";
+  $sql = "INSERT INTO pet.vendor (account, password, name, logo_image,created_at,updated_at) VALUES ('$account', '$hashedPassword', '$name', 'defaultIcon.png','$currentDateTime','$currentDateTime');";
   // 執行 SQL 語句並將資料插入資料庫
   $result = $conn->query($sql);
   if ($result) {
     // 延遲兩秒後跳轉至其他頁面
-    echo '<script>setTimeout(function() { window.location = "log-in.php"; }, 2000);</script>';
+    echo '<script>setTimeout(function() { window.location = "log-in.php"; }, 1500);</script>';
   } else {
     // 插入失敗
-    echo '<script>alert("提交失敗，請重新操作一次");</script>';
+    $_SESSION['signup_error'] = "提交失敗，請重新操作一次";
+    header("location: sign-up.php");
   }
 }
 
@@ -44,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 <body>
 
   <dialog>
-    <h2>帳號已註冊成功，<br />兩秒後自動跳轉登入畫面。。。</h2>
+    <h2>帳號已註冊成功，<br />自動跳轉登入畫面。。。</h2>
   </dialog>
 
   <script>
@@ -58,6 +59,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     });
   </script>
 </body>
-
 
 </html>
