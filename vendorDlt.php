@@ -24,4 +24,4 @@ foreach ($checkboxes as $checkbox) {
     $sql = "DELETE FROM vendor WHERE vendor_id = $checkbox";
     $result = $conn->query($sql);
 }
-header("location: mainVendors.php?search=" . $search . "&sortNum=" . $sortNum . "&infoNum=" . $infoNum);
+header("location: admin-vendors.php?search=" . $search . "&sortNum=" . $sortNum . "&infoNum=" . $infoNum);

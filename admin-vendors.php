@@ -1,5 +1,5 @@
 <?php
-include("do_mainVendor.php");
+include("do-admin-vendor.php");
 //搜尋功能
 if (isset($_GET['search'])) {
   $search = $_GET['search'];
@@ -133,7 +133,7 @@ if ($infoNum == 20) {
               <div class="d-flex justify-content-center mb-3">
                 <div class="d-flex align-items-center justify-content-between">
                   <span>顯示</span>
-                  <form action="mainVendors.php" method="GET" onchange="submit()">
+                  <form action="admin-vendors.php" method="GET" onchange="submit()">
                     <select class="selectInfo form-select text-center border border-secondary rounded mx-2" aria-label="Default select example" name="infoNum">
                       <option <?php if ($infoNum == 5) echo "selected='selected'" ?> value="5">5</option>
                       <option <?php if ($infoNum == 20) echo "selected='selected'" ?>value="20">20</option>
@@ -148,7 +148,7 @@ if ($infoNum == 20) {
                   </form>
                   <span>筆資料</span>
                 </div>
-                <form id="sortForm" action="mainVendors.php" method="GET">
+                <form id="sortForm" action="admin-vendors.php" method="GET">
                   <?php if (isset($search)) { ?>
                     <input type="hidden" name="search" value="<?php echo $search; ?>">
                   <?php } ?>
@@ -185,7 +185,7 @@ if ($infoNum == 20) {
                   <input type="hidden" name="infoNum" value="<?php echo $infoNum; ?>">
                 </form>
 
-                <form action="mainVendors.php" class="searchForm form-inline offset-6" method="GET">
+                <form action="admin-vendors.php" class="searchForm form-inline offset-6" method="GET">
                   <?php if (isset($sortNum)) { ?><input type="hidden" name="sortNum" value="<?php echo $sortNum; ?>"><?php } ?>
                   <?php if (isset($infoNum)) { ?><input type="hidden" name="infoNum" value="<?php echo $infoNum; ?>"><?php } ?>
                   <input class=" form-control mr-sm-2" type="search" placeholder="Search" aria-label="Search" name="search">
@@ -331,7 +331,7 @@ if ($infoNum == 20) {
               searchValue = null;
               resetBtn.classList.add("d-none")
               var xhr = new XMLHttpRequest();
-              xhr.open("GET", "mainvendors.php", true);
+              xhr.open("GET", "admin-vendors.php", true);
               xhr.onreadystatechange = function() {
                 if (xhr.readyState === 4 && xhr.status === 200) {
                   var response = xhr.responseText;
@@ -347,10 +347,10 @@ if ($infoNum == 20) {
           function loadPage(page) {
             var xhr = new XMLHttpRequest();
             if (searchValue != null) {
-              xhr.open("GET", "mainvendors.php?page=" + page + "&search=" + searchValue + "&sortNum=" + sortNum + "&infoNum=" + infoNum, true);
+              xhr.open("GET", "admin-vendors.php?page=" + page + "&search=" + searchValue + "&sortNum=" + sortNum + "&infoNum=" + infoNum, true);
 
             } else {
-              xhr.open("GET", "mainvendors.php?page=" + page + "&sortNum=" + sortNum + "&infoNum=" + infoNum, true);
+              xhr.open("GET", "admin-vendors.php?page=" + page + "&sortNum=" + sortNum + "&infoNum=" + infoNum, true);
 
             }
             //使用 querySelector 方法在每次调用 loadPage 函数时获取 resetBtn 元素，并在需要的时候动态地添加或移除 d-none。
@@ -367,7 +367,7 @@ if ($infoNum == 20) {
                     searchValue = null;
                     resetBtn.classList.add("d-none")
                     var xhr = new XMLHttpRequest();
-                    xhr.open("GET", "mainvendors.php", true);
+                    xhr.open("GET", "admin-vendors.php", true);
                     xhr.onreadystatechange = function() {
                       if (xhr.readyState === 4 && xhr.status === 200) {
                         var response = xhr.responseText;

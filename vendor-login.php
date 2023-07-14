@@ -32,7 +32,7 @@
     <div class="card mt-5">
         <div class="card-body d-flex flex-column ">
             <h1 class="card-title text-center">廠商後臺登入</h1>
-            <form onsubmit="checkSubmit(event)" method="POST" action="do-log-in.php">
+            <form onsubmit="checkSubmit(event)" method="POST" action="vendor-do-login.php">
                 <div class="my-3">
                     <label for="account" class="form-label">使用者帳號</label>
                     <input type="text" name="account" class="account form-control" id="account" placeholder="請輸入使用者帳號">

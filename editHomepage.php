@@ -1,11 +1,11 @@
 <?php
 session_start();
 require_once('connect.php');
-$account = $_SESSION['account'];
+$stored_account = $_SESSION['account'];
 $password = $_SESSION['password'];
 $currentDateTime = date('Y-m-d H:i:s');
 $stmt = $conn->prepare("SELECT * FROM vendor WHERE account = ? AND password = ? LIMIT 1");
-$stmt->bind_param("ss", $account, $password);
+$stmt->bind_param("ss", $stored_account, $password);
 $stmt->execute();
 $result = $stmt->get_result();
 $row = $result->fetch_assoc();
@@ -13,6 +13,16 @@ $row = $result->fetch_assoc();
 if (!empty($_POST)) {
     $name = $_POST['name'];
     $account = $_POST['account'];
+    $stmt_acc = $conn->prepare("SELECT * FROM vendor WHERE account = ?");
+    $stmt_acc->bind_param("s", $account);
+    $stmt_acc->execute();
+    $result_acc = $stmt_acc->get_result();
+    $acc_num = $result_acc->num_rows;
+    if ($acc_num > 0 && $account != $stored_account) {
+        echo "<script>alert('帳號已被使用，請重新輸入');</script>";
+        echo "<script>window.location = 'editHomepage.php';</script>";
+        exit; // 停止執行後續程式碼，避免跳轉
+    }
     $location = $_POST['location'];
     $vendor_id = $row['vendor_id'];
     $image = $row['logo_image']; // 默认值为原始的 logo_image
@@ -45,6 +55,7 @@ if (!empty($_POST)) {
     $stmt->bind_param("ssssi", $name, $account, $location, $image, $vendor_id);
     $stmt->execute();
     $stmt->close();
+    $_SESSION['account'] = $account; //如果有變更帳號的話要更新帳號值，homepage才不會報錯
     header("location: vendorHomepage.php");
     exit;
 }
@@ -128,16 +139,12 @@ $vendorInfo = array(
     <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js" integrity="sha384-oBqDVmMz9ATKxIep9tiCxS/Z9fNfEXiDAYTujMAeBAsjFuCZSmKbSSUnQlmh/jp3" crossorigin="anonymous"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.1/dist/js/bootstrap.min.js" integrity="sha384-7VPbUDkoPSGFnVtYi0QogXtr74QeVeeIs99Qfg5YCF+TidwNdjvaKZX19NZ/e6oz" crossorigin="anonymous"></script>
     <script>
-        const name = document.getElementById("name").value;
-        const account = document.getElementById("account").value;
-        console.log(name)
-
         function nosubmit(event) {
             event.preventDefault();
             const name = document.getElementById("name").value;
             const account = document.getElementById("account").value;
             console.log(name, account)
-            if (name == '' || account == '') {
+            if (name.trim() === '' || account.trim() === '') {
                 alert("廠商名稱及使用者帳號禁止空白");
                 return false;
             }

@@ -30,7 +30,7 @@
         <div class="card mt-5">
             <div class="card-body">
                 <h1 class="card-title text-center">廠商會員註冊</h1>
-                <form onsubmit="noSubmit(event)" action="do-sign-up.php" method="POST">
+                <form onsubmit="noSubmit(event)" action="vendor-do-signup.php" method="POST">
                     <div class="mb-3">
                         <label for="name" class="form-label"><span style="color:red">*</span>公司名稱</label>
                         <input type="text" class=" form-control" id="name" name="name" placeholder="請輸入公司名稱">
@@ -84,7 +84,7 @@
                 document.querySelector(".check").innerHTML = "請輸入使用者帳號"
             } else {
                 var xhr = new XMLHttpRequest();
-                xhr.open("POST", "checkUser.php", true);
+                xhr.open("POST", "vendor-do-signup-user.php", true);
                 xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
                 xhr.onreadystatechange = function() {
                     if (xhr.readyState === 4 && xhr.status === 200) {

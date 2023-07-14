@@ -14,11 +14,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
   $result = $conn->query($sql);
   if ($result) {
     // 延遲兩秒後跳轉至其他頁面
-    echo '<script>setTimeout(function() { window.location = "log-in.php"; }, 1500);</script>';
+    echo '<script>setTimeout(function() { window.location = "vendor-login.php"; }, 1500);</script>';
   } else {
     // 插入失敗
     $_SESSION['signup_error'] = "提交失敗，請重新操作一次";
-    header("location: sign-up.php");
+    header("location: vendor-signup.php");
   }
 }
 

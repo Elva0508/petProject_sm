@@ -61,12 +61,12 @@ if ($result->num_rows > 0) { ?>
     <?php } else {
         //登入失敗
         $_SESSION['login_error'] = "帳號或密碼輸入錯誤，請重新確認";
-        header("location: log-in.php");
+        header("location: vendor-login.php");
     } ?>
 
 
 <?php } else {
     // 登入失敗
     $_SESSION['login_error'] = "帳號或密碼輸入錯誤，請重新確認";
-    header("location: log-in.php");
+    header("location: vendor-login.php");
 } ?>
