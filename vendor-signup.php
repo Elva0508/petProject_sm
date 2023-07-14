@@ -66,7 +66,7 @@
                     <div class="d-flex">
                         <button type="submit" class="btn btn-primary mx-1 btn-lg">註冊</button>
                         <button type="button" class="btn btn-primary btn-lg" onclick="resetForm()">重設</button>
-                        <a type="button" class="btn btn-primary btn-lg" style="margin-left:auto" href="log-in.php">取消</a>
+                        <a type="button" class="btn btn-primary btn-lg" style="margin-left:auto" href="vendor-login.php">取消</a>
                     </div>
                 </form>
             </div>

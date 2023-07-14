@@ -58,7 +58,7 @@
                 <div class="btns">
                     <button type="submit" class="submitBtn btn btn-lg btn-primary ">登入</button>
 
-                    <a type="submit" class="btn btn-primary btn-lg  ms-2" href="sign-up.php">註冊</a>
+                    <a type="submit" class="btn btn-primary btn-lg  ms-2" href="vendor-signup.php">註冊</a>
                 </div>
 
             </form>
