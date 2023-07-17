@@ -92,7 +92,8 @@ $vendorInfo = array(
                     <img src="./vendorLogo/<?php echo  $row['logo_image'] ?>" alt="vendorImage" class="header-img">
                 </div>
                 <div class="fileInput col-12 d-flex justify-content-center">
-                    <input type="file" name="image" class="offset-2 mt-2">
+                    //增加照片預覽功能
+                    <input type="file" name="image" class="offset-2 mt-2" onchange="previewFile()">
                 </div>
 
                 <div class="row mt-4 col-12 offset-2">
@@ -149,6 +150,20 @@ $vendorInfo = array(
                 return false;
             }
             document.querySelector(".editForm").submit();
+        }
+        //增加照片預覽功能
+        function previewFile() {
+            var preview = document.querySelector('.header-img');
+            var file = document.querySelector('input[type=file]').files[0];
+            var reader = new FileReader();
+
+            reader.addEventListener("load", function() {
+                preview.src = reader.result;
+            }, false);
+
+            if (file) {
+                reader.readAsDataURL(file);
+            }
         }
     </script>
 </body>

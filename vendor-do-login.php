@@ -60,13 +60,15 @@ if ($result->num_rows > 0) { ?>
         <?php echo '<script>setTimeout(function() { window.location = "vendorHomepage.php"; }, 1500);</script>'; ?>
     <?php } else {
         //登入失敗
-        $_SESSION['login_error'] = "帳號或密碼輸入錯誤，請重新確認";
+        $_SESSION['login_error'] = "測試一：帳號或密碼輸入錯誤，請重新確認";
         header("location: vendor-login.php");
+        exit;
     } ?>
 
 
 <?php } else {
     // 登入失敗
-    $_SESSION['login_error'] = "帳號或密碼輸入錯誤，請重新確認";
+    $_SESSION['login_error'] = "測試二：帳號或密碼輸入錯誤，請重新確認";
     header("location: vendor-login.php");
+    exit;
 } ?>
